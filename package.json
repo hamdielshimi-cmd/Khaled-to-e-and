@@ -1,0 +1,16 @@
+{
+  "name": "zoho-qna-app",
+  "version": "1.1.0",
+  "description": "Zoho QnA App (Web) - Arabic RTL. Login protected. Ready for GitHub + Railway deployment.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "bcrypt": "^5.1.0",
+    "dotenv": "^16.0.3"
+  }
+}

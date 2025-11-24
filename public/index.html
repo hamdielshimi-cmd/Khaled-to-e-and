@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zoho QnA - e&</title>
+  <style>
+    body { font-family: "Tahoma", Arial, sans-serif; background:#f5f6fa; color:#111; padding:20px; }
+    .card { background:white; border-radius:8px; padding:16px; box-shadow:0 2px 6px rgba(0,0,0,0.06); max-width:900px; margin:auto; }
+    header { display:flex; gap:12px; align-items:center; margin-bottom:12px; }
+    img.logo { height:44px; }
+    label { display:block; margin-top:8px; font-weight:600; }
+    select, textarea, input { width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid #ddd; }
+    button { margin-top:10px; padding:10px 14px; border:none; background:#0066cc; color:white; border-radius:6px; cursor:pointer; }
+    .answer { margin-top:12px; white-space:pre-wrap; }
+    .sources { margin-top:8px; font-size:13px; color:#444; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="topbar">
+      <header style="display:flex; gap:12px; align-items:center;">
+        <img class="logo" src="https://ik.imagekit.io/xtj3m9hth/image-remove1bg-preview%20(3).png?updatedAt=1761220721716" alt="e&" />
+        <img class="logo" src="https://ik.imagekit.io/weo7pcw8v/image-removebg-preview%20(3).png?updatedAt=1761788895997" alt="Zoho" />
+        <h2 style="margin:0;">نظام دعم مبيعات Zoho (قواعد e&)</h2>
+      </header>
+      <div>
+        <button id="logoutBtn" style="background:#cc0000;">تسجيل خروج</button>
+      </div>
+    </div>
+
+    <div>
+      <label>اختر القطاع (اختياري)</label>
+      <select id="industry">
+        <option value="">عام / غير محدد</option>
+        <option value="retail">التجزئة والتجارة الإلكترونية</option>
+        <option value="logistics">الخدمات اللوجستية</option>
+        <option value="fintech">التكنولوجيا المالية</option>
+        <option value="tourism">السياحة والضيافة</option>
+        <option value="realestate">العقارات والإنشاءات</option>
+        <option value="health">الرعاية الصحية</option>
+      </select>
+
+      <label>نوع السؤال (اختياري)</label>
+      <select id="scenario">
+        <option value="">عام</option>
+        <option value="discovery">اكتشاف</option>
+        <option value="objection">اعتراض</option>
+        <option value="value">قيمة المنتج</option>
+        <option value="recommend">اختيار التطبيق</option>
+        <option value="workflow">مشكلة تشغيلية</option>
+        <option value="closing">إغلاق / لوجستيات</option>
+      </select>
+
+      <label>اكتب سؤال العميل هنا (عربي أو إنجليزي)</label>
+      <textarea id="question" rows="4" placeholder="مثال: هل Zoho Inventory يدعم ربط المتاجر الإلكترونية؟"></textarea>
+
+      <div style="display:flex; gap:8px;">
+        <button id="ingestBtn">تحميل وفهرسة المصادر</button>
+        <button id="askBtn">إرسال السؤال</button>
+      </div>
+
+      <div class="answer card" id="result" style="display:none;"></div>
+      <div class="sources" id="sources"></div>
+    </div>
+  </div>
+
+<script>
+async function postJson(url, body){
+  const res = await fetch(url, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)});
+  if(res.headers.get("content-type") && res.headers.get("content-type").includes("application/json")){
+    return res.json();
+  } else {
+    return {};
+  }
+}
+
+document.getElementById("ingestBtn").addEventListener("click", async ()=>{
+  const btn = document.getElementById("ingestBtn");
+  btn.disabled = true;
+  btn.textContent = "جاري الفهرسة...";
+  const r = await postJson("/ingest", {});
+  alert("فُهرِس " + (r.indexed||0) + " مقطع نصي");
+  btn.disabled = false;
+  btn.textContent = "تحميل وفهرسة المصادر";
+});
+
+document.getElementById("askBtn").addEventListener("click", async ()=>{
+  const q = document.getElementById("question").value.trim();
+  if(!q){ alert("الرجاء كتابة سؤال العميل"); return; }
+  const industry = document.getElementById("industry").value;
+  const scenario = document.getElementById("scenario").value;
+  const resultDiv = document.getElementById("result");
+  resultDiv.style.display = "block";
+  resultDiv.textContent = "جاري البحث وتجهيز الإجابة...";
+  const body = {question: q, industry, scenario, top_k:6, use_gemini:false};
+  const resp = await postJson("/ask", body);
+  resultDiv.textContent = resp.answer_ar;
+  const sourcesDiv = document.getElementById("sources");
+  if(resp.sources && resp.sources.length>0){
+    sourcesDiv.innerHTML = "<strong>المصادر:</strong><br/>" + resp.sources.map(s=>`${s.file.split("/").pop()} (chunk ${s.chunk_index}) — score: ${(s.score||0).toFixed(3)}`).join("<br/>");
+  }else sourcesDiv.textContent = "";
+});
+
+document.getElementById("logoutBtn").addEventListener("click", async ()=>{
+  await postJson("/logout", {});
+  window.location.href = "/";
+});
+</script>
+</body>
+</html>

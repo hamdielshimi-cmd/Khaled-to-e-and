@@ -1,0 +1,27 @@
+
+name: CI & Deploy to Railway
+on:
+  push:
+    branches: [ main, master ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install deps
+        run: npm ci
+      - name: Run basic check
+        run: node -e "console.log('sanity check')"
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Railway (placeholder)
+        if: secrets.RAILWAY_API_KEY != ''
+        run: |
+          echo "Configure Railway CLI or Action to deploy using RAILWAY_API_KEY"

@@ -1,0 +1,10 @@
+{
+  "name": "zoho-qna-app",
+  "services": [
+    {
+      "name": "web",
+      "path": ".",
+      "startCommand": "node server.js"
+    }
+  ]
+}
