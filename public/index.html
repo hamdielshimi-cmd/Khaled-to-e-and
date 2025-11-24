@@ -1,1 +1,246 @@
-﻿... (FULL SCRIPT I GAVE YOU) ...
+﻿<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zoho QnA - e&</title>
+  <style>
+    :root{
+      --primary:#0066cc;
+      --accent:#ff7a59;
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --radius:12px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family: "Tajawal", "Tahoma", Arial, sans-serif;background:var(--bg);color:#0b1220;line-height:1.5}
+    .container{max-width:1100px;margin:28px auto;padding:18px}
+    .top{display:flex;gap:18px;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand img{height:44px}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:0 6px 20px rgba(10,20,40,0.06);padding:18px}
+    h1{margin:0;font-size:20px}
+    .controls{display:flex;gap:12px;align-items:center}
+    .btn{background:var(--primary);color:#fff;border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
+    .btn.ghost{background:transparent;color:var(--primary);border:1px solid rgba(0,102,204,0.12)}
+    .layout{display:grid;grid-template-columns: 1fr 420px;gap:18px;margin-top:14px}
+    @media(max-width:960px){.layout{grid-template-columns:1fr;}}
+    label{display:block;font-weight:700;margin-top:10px}
+    select,textarea,input{width:100%;padding:10px;border-radius:10px;border:1px solid #e8eef8;background:#fbfdff}
+    textarea{min-height:110px;resize:vertical}
+    /* dropzone */
+    .dropzone{border:2px dashed #d6e5ff;border-radius:12px;padding:20px;text-align:center;background:linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);cursor:pointer}
+    .dropzone.drag{border-color:var(--primary);box-shadow:0 8px 30px rgba(0,102,204,0.06)}
+    .file-list{margin-top:12px;font-size:14px;color:var(--muted)}
+    .file-item{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:8px;background:#fbfdff;margin-top:8px;align-items:center;border:1px solid #f0f6ff}
+    .file-item small{color:var(--muted)}
+    .result{white-space:pre-wrap;margin-top:12px;background:#fcfeff;padding:12px;border-radius:10px;border:1px solid #eef6ff}
+    .sources{margin-top:10px;color:var(--muted);font-size:13px}
+    .logos{display:flex;gap:10px;align-items:center}
+    .logout{background:#cc0000}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top">
+      <div class="brand">
+        <img src="https://ik.imagekit.io/xtj3m9hth/image-remove1bg-preview%20(3).png?updatedAt=1761220721716" alt="e& logo">
+        <img src="https://ik.imagekit.io/weo7pcw8v/image-removebg-preview%20(3).png?updatedAt=1761788895997" alt="Zoho logo" style="height:36px">
+        <div>
+          <h1>نظام دعم مبيعات Zoho — e&</h1>
+          <div style="color:var(--muted);font-size:13px;margin-top:4px">قاعدة معرفة محلية • إجابات منظمة بالعربية</div>
+        </div>
+      </div>
+      <div class="controls">
+        <button id="logoutBtn" class="btn logout">تسجيل خروج</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div>
+        <div class="card">
+          <label>اختر القطاع (اختياري)</label>
+          <select id="industry">
+            <option value="">عام / غير محدد</option>
+            <option value="retail">التجزئة والتجارة الإلكترونية</option>
+            <option value="logistics">الخدمات اللوجستية</option>
+            <option value="fintech">التكنولوجيا المالية</option>
+            <option value="tourism">السياحة والضيافة</option>
+            <option value="realestate">العقارات والإنشاءات</option>
+            <option value="health">الرعاية الصحية</option>
+          </select>
+
+          <label>نوع السؤال (اختياري)</label>
+          <select id="scenario">
+            <option value="">عام</option>
+            <option value="discovery">اكتشاف</option>
+            <option value="objection">اعتراض</option>
+            <option value="value">قيمة المنتج</option>
+            <option value="recommend">اختيار التطبيق</option>
+            <option value="workflow">مشكلة تشغيلية</option>
+            <option value="closing">إغلاق / لوجستيات</option>
+          </select>
+
+          <label>اكتب سؤال العميل هنا (عربي أو إنجليزي)</label>
+          <textarea id="question" placeholder="مثال: هل Zoho Inventory يدعم ربط المتاجر الإلكترونية؟"></textarea>
+
+          <div style="display:flex;gap:10px;margin-top:12px;align-items:center">
+            <button id="showUploader" class="btn">تحميل وفهرسة المصادر</button>
+            <button id="askBtn" class="btn">إرسال السؤال</button>
+          </div>
+
+          <div id="uploader" style="display:none;margin-top:14px">
+            <div id="dropzone" class="dropzone" tabindex="0">
+              <div style="font-weight:700;color:#003366">اسحب الملفات هنا أو اضغط لاختيارها</div>
+              <div style="font-size:13px;color:var(--muted);margin-top:6px">يدعم: PDF, TXT, DOCX, MD</div>
+            </div>
+            <input id="fileInput" type="file" multiple style="display:none" accept=".pdf,.txt,.docx,.md" />
+            <div class="file-list" id="fileList">لا توجد ملفات مختارة</div>
+            <div style="margin-top:10px">
+              <button id="startIngestBtn" class="btn" style="background:#16a34a">بدء الفهرسة</button>
+            </div>
+          </div>
+
+          <div id="result" class="result" style="display:none"></div>
+          <div id="sources" class="sources"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card">
+          <h3 style="margin:0 0 8px 0">ملاحظات سريعة</h3>
+          <ul style="color:var(--muted);padding-left:18px">
+            <li>سجّل الدخول كـ admin ثم استخدم زر <strong>تحميل وفهرسة المصادر</strong>.</li>
+            <li>بعد رفع الملفات اضغط <strong>بدء الفهرسة</strong> لقراءة النصوص محليًا.</li>
+            <li>إذا كانت ملفات PDF ممسوحة ضوئيًا (صور) فستحتاج تفعيل OCR لاحقًا.</li>
+            <li>لا تقم بتحميل مفاتيح أو كلمات مرور إلى الملفات المرفوعة.</li>
+          </ul>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="card">
+          <h4 style="margin:0 0 8px 0">روابط سريعة</h4>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <a class="btn ghost" href="/admin/status" style="text-align:center">حالة الفهرس</a>
+            <a class="btn ghost" href="#" style="text-align:center" id="howto">كيف نستخدمها</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* uploader + drag & drop + ask logic */
+const showUploader = document.getElementById('showUploader');
+const uploader = document.getElementById('uploader');
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const fileList = document.getElementById('fileList');
+const startIngestBtn = document.getElementById('startIngestBtn');
+const askBtn = document.getElementById('askBtn');
+const resultDiv = document.getElementById('result');
+const sourcesDiv = document.getElementById('sources');
+const logoutBtn = document.getElementById('logoutBtn');
+
+let filesToUpload = [];
+
+showUploader.addEventListener('click', () => {
+  uploader.style.display = uploader.style.display === 'none' ? 'block' : 'none';
+});
+
+dropzone.addEventListener('click', ()=> fileInput.click());
+dropzone.addEventListener('dragover', (e)=> { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', (e)=> { e.preventDefault(); dropzone.classList.remove('drag'); });
+dropzone.addEventListener('drop', (e)=> {
+  e.preventDefault(); dropzone.classList.remove('drag');
+  const dropped = Array.from(e.dataTransfer.files);
+  filesToUpload = filesToUpload.concat(dropped);
+  renderFileList();
+});
+
+fileInput.addEventListener('change', (e)=> {
+  filesToUpload = filesToUpload.concat(Array.from(e.target.files));
+  renderFileList();
+});
+
+function renderFileList(){
+  if(filesToUpload.length === 0){ fileList.textContent = 'لا توجد ملفات مختارة'; return; }
+  fileList.innerHTML = filesToUpload.map((f,idx)=> `<div class="file-item"><div>${f.name} <small>· ${Math.round(f.size/1024)} KB</small></div><div><button data-idx="${idx}" class="btn ghost">حذف</button></div></div>`).join('');
+  // attach delete handlers
+  Array.from(document.querySelectorAll('.file-item button')).forEach(btn=>{
+    btn.onclick = (ev)=>{
+      const idx = Number(ev.target.getAttribute('data-idx'));
+      filesToUpload.splice(idx,1);
+      renderFileList();
+    };
+  });
+}
+
+/* upload + ingest */
+async function postForm(url, formData){
+  const res = await fetch(url, { method:'POST', body: formData, credentials:'same-origin' });
+  return res.json();
+}
+
+startIngestBtn.addEventListener('click', async ()=>{
+  if(filesToUpload.length === 0){ alert('الرجاء اختيار ملفات أولاً'); return; }
+  startIngestBtn.disabled = true;
+  startIngestBtn.textContent = 'جاري رفع الملفات...';
+  try{
+    const fd = new FormData();
+    filesToUpload.forEach(f => fd.append('files', f));
+    const up = await postForm('/upload-files', fd);
+    if(!up.ok){ alert('فشل رفع الملفات: ' + (up.error || JSON.stringify(up))); startIngestBtn.disabled=false; startIngestBtn.textContent='بدء الفهرسة'; return; }
+    startIngestBtn.textContent = 'جاري الفهرسة...';
+    const ing = await fetch('/ingest', { method:'POST', credentials:'same-origin' });
+    const ingJson = await ing.json();
+    alert('فُهرِس ' + (ingJson.indexed||0) + ' مقطع نصي');
+    filesToUpload = [];
+    renderFileList();
+  }catch(err){
+    alert('خطأ: ' + err.message);
+  }finally{
+    startIngestBtn.disabled = false;
+    startIngestBtn.textContent = 'بدء الفهرسة';
+  }
+});
+
+/* ask */
+async function postJson(url, body){
+  const res = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body), credentials:'same-origin' });
+  return res.json();
+}
+
+askBtn.addEventListener('click', async ()=>{
+  const q = document.getElementById('question').value.trim();
+  if(!q){ alert('الرجاء كتابة سؤال العميل'); return; }
+  resultDiv.style.display = 'block';
+  resultDiv.textContent = 'جاري البحث وتجهيز الإجابة...';
+  const industry = document.getElementById('industry').value;
+  const scenario = document.getElementById('scenario').value;
+  try{
+    const resp = await postJson('/ask', { question: q, industry, scenario, top_k:6, use_gemini:false });
+    resultDiv.textContent = resp.answer_ar || 'لا توجد إجابة';
+    if(resp.sources && resp.sources.length>0){
+      sourcesDiv.innerHTML = '<strong>المصادر:</strong><br/>' + resp.sources.map(s=>`${s.file.split('/').pop()} (chunk ${s.chunk_index}) — score: ${(s.score||0).toFixed(3)}`).join('<br/>');
+    } else sourcesDiv.textContent = '';
+  }catch(e){
+    resultDiv.textContent = 'حدث خطأ: ' + e.message;
+  }
+});
+
+/* logout */
+logoutBtn.addEventListener('click', async ()=>{
+  await postJson('/logout', {});
+  window.location.href = '/';
+});
+
+/* quick howto */
+document.getElementById('howto').addEventListener('click', ()=> {
+  alert('1) اضغط تحميل وفهرسة المصادر -> اختر ملفات (PDF/TXT/DOCX).\\n2) اضغط بدء الفهرسة.\\n3) اطرح سؤالًا في الحقل واضغط إرسال السؤال.');
+});
+</script>
+</body>
+</html>
