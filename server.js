@@ -97,11 +97,11 @@ const technical = extractTechnicalDetails(relevantChunks);
 // FIX IS HERE: Close the string with "
 answer += technical + "\n\n";
 
-  // 10. PRICING & ROI
-  if (containsPricingInfo(relevantChunks)) {
-    answer += `## 💰 التسعير والعائد على الاستثمار:\n\n`;
-    const pricing = extractPricingInfo(relevantChunks);
-    answer += pricing + "\n\n`;
+// Change this:
+// answer += pricing + "\n\n`;
+
+// TO THIS (replace the backtick with a double quote):
+answer += pricing + "\n\n";
   }
 
   // 11. NEXT STEPS
