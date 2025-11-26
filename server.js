@@ -90,33 +90,39 @@ function buildComprehensiveAnswer(question, relevantChunks, industry, scenario) 
   const results = generateExpectedResults(relevantChunks);
   answer += results + "\n\n";
 
+// ... (Code up to point 8) ...
+
 // 9. TECHNICAL DETAILS
-answer += `## 🔧 التفاصيل التقنية:\n\n`; // This line uses a template literal (backticks) correctly
+answer += `## 🔧 التفاصيل التقنية:\n\n`; 
 const technical = extractTechnicalDetails(relevantChunks);
+answer += technical + "\n\n"; // Fix for previous backtick error
 
-// FIX IS HERE: Close the string with "
-answer += technical + "\n\n";
+// 10. PRICING / ROI (NEW SECTION)
+// This code block was placed incorrectly in the original structure.
+if (containsPricingInfo(relevantChunks)) { // Add a check to see if pricing data exists
+    answer += `## 💰 الأسعار والعائد على الاستثمار\n\n`;
+    const pricing = extractPricingInfo(relevantChunks);
+    answer += pricing + "\n\n"; // Removed the old, incorrect assignment
+}
+// REMOVE THE ROGUE '}' HERE
+// } <--- DO NOT INCLUDE THIS LINE!
 
-// Change this:
-// answer += pricing + "\n\n`;
+// 11. NEXT STEPS
+answer += `## 🎯 الخطوات التالية:\n\n`;
+answer += `1. **المراجعة:** راجع هذا الحل مع فريقك\n`;
+answer += `2. **التخطيط:** حدد الأولويات والجدول الزمني\n`;
+answer += `3. **التطبيق:** ابدأ بمرحلة تجريبية صغيرة\n`;
+answer += `4. **التوسع:** وسّع النطاق بعد النجاح الأولي\n\n`;
 
-// TO THIS (replace the backtick with a double quote):
-answer += pricing + "\n\n";
-  }
-
-  // 11. NEXT STEPS
-  answer += `## 🎯 الخطوات التالية:\n\n`;
-  answer += `1. **المراجعة:** راجع هذا الحل مع فريقك\n`;
-  answer += `2. **التخطيط:** حدد الأولويات والجدول الزمني\n`;
-  answer += `3. **التطبيق:** ابدأ بمرحلة تجريبية صغيرة\n`;
-  answer += `4. **التوسع:** وسّع النطاق بعد النجاح الأولي\n\n`;
-
-  // 12. SOURCE REFERENCES
-  answer += `---\n\n`;
-  answer += `## 📚 المصادر المستخدمة:\n\n`;
-  relevantChunks.forEach((chunk, idx) => {
+// 12. SOURCE REFERENCES
+answer += `---\n\n`;
+answer += `## 📚 المصادر المستخدمة:\n\n`;
+relevantChunks.forEach((chunk, idx) => {
     answer += `${idx + 1}. **${path.basename(chunk.file)}** (جزء ${chunk.chunk_index}) - درجة التطابق: ${(chunk.score * 100).toFixed(1)}%\n`;
-  });
+});
+
+return answer;
+} // <--- Final closing brace for buildComprehensiveAnswer is correctly placed here
 
   return answer;
 }
