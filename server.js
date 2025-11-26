@@ -90,10 +90,12 @@ function buildComprehensiveAnswer(question, relevantChunks, industry, scenario) 
   const results = generateExpectedResults(relevantChunks);
   answer += results + "\n\n";
 
-  // 9. TECHNICAL DETAILS
-  answer += `## 🔧 التفاصيل التقنية:\n\n`;
-  const technical = extractTechnicalDetails(relevantChunks);
-  answer += technical + "\n\n`;
+// 9. TECHNICAL DETAILS
+answer += `## 🔧 التفاصيل التقنية:\n\n`; // This line uses a template literal (backticks) correctly
+const technical = extractTechnicalDetails(relevantChunks);
+
+// FIX IS HERE: Close the string with "
+answer += technical + "\n\n";
 
   // 10. PRICING & ROI
   if (containsPricingInfo(relevantChunks)) {
