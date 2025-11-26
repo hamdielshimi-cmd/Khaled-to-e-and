@@ -2,6 +2,7 @@ import express from "express";
 import session from "express-session";
 import dotenv from "dotenv";
 import path from "path";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 
@@ -18,6 +19,51 @@ app.use(express.static(publicDir));
 // Root route: serve `public/index.html` for GET /
 app.get("/", (req, res) => {
   res.sendFile(path.join(publicDir, "index.html"));
+});
+
+// Simple user store loader: optional JSON file via USERS_FILE env var.
+// Format: [{ "username": "admin", "passwordHash": "..." }, ...]
+let USERS = [];
+const usersFile = process.env.USERS_FILE || null;
+if (usersFile) {
+  try {
+    const usersPath = path.isAbsolute(usersFile) ? usersFile : path.join(process.cwd(), usersFile);
+    const content = await import(`file://${usersPath}`);
+    USERS = content.default || content;
+  } catch (err) {
+    console.warn("Could not load USERS_FILE", err.message);
+  }
+}
+// If no users configured, create a demo user `admin` / `password` (hashed).
+if (!USERS || USERS.length === 0) {
+  const demoHash = bcrypt.hashSync("password", 10);
+  USERS = [{ username: "admin", passwordHash: demoHash }];
+  console.info("No users file found — created demo user 'admin' with password 'password'. Change in production.");
+}
+
+// POST /login — accepts JSON { username, password } or form data
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body || {};
+  if (!username || !password) return res.status(400).json({ error: "username and password required" });
+
+  const user = USERS.find(u => u.username === username);
+  if (!user) return res.status(401).json({ error: "Invalid credentials" });
+
+  const ok = await bcrypt.compare(password, user.passwordHash);
+  if (!ok) return res.status(401).json({ error: "Invalid credentials" });
+
+  // Set session user
+  req.session.user = { username: user.username };
+  return res.json({ ok: true, username: user.username });
+});
+
+// POST /logout — destroy session
+app.post("/logout", (req, res) => {
+  req.session.destroy(err => {
+    if (err) return res.status(500).json({ error: "Failed to logout" });
+    res.clearCookie("connect.sid");
+    return res.json({ ok: true });
+  });
 });
 
 // Temporary permissive authentication middleware placeholder.
