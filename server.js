@@ -1,12 +1,8 @@
 import express from "express";
-import session from "express-session";
 import dotenv from "dotenv";
 import path from "path";
-import bcrypt from "bcrypt";
 
 dotenv.config();
-
-import session from "express-session";
 
 const app = express();
 app.use(express.json());
@@ -21,80 +17,10 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(publicDir, "index.html"));
 });
 
-// Simple user store loader: optional JSON file via USERS_FILE env var.
-// Format: [{ "username": "admin", "passwordHash": "..." }, ...]
-let USERS = [];
-const usersFile = process.env.USERS_FILE || null;
-if (usersFile) {
-  try {
-    const usersPath = path.isAbsolute(usersFile) ? usersFile : path.join(process.cwd(), usersFile);
-    const content = await import(`file://${usersPath}`);
-    USERS = content.default || content;
-  } catch (err) {
-    console.warn("Could not load USERS_FILE", err.message);
-  }
-}
-// If no users configured, create a demo user `admin` / `password` (hashed).
-if (!USERS || USERS.length === 0) {
-  const demoHash = bcrypt.hashSync("password", 10);
-  USERS = [{ username: "admin", passwordHash: demoHash }];
-  console.info("No users file found — created demo user 'admin' with password 'password'. Change in production.");
-}
-
-// POST /login — accepts JSON { username, password } or form data
-app.post("/login", async (req, res) => {
-  const { username, password } = req.body || {};
-  if (!username || !password) return res.status(400).json({ error: "username and password required" });
-
-  const user = USERS.find(u => u.username === username);
-  if (!user) return res.status(401).json({ error: "Invalid credentials" });
-
-  const ok = await bcrypt.compare(password, user.passwordHash);
-  if (!ok) return res.status(401).json({ error: "Invalid credentials" });
-
-  // Set session user
-  req.session.user = { username: user.username };
-  return res.json({ ok: true, username: user.username });
-});
-
-// POST /logout — destroy session
-app.post("/logout", (req, res) => {
-  req.session.destroy(err => {
-    if (err) return res.status(500).json({ error: "Failed to logout" });
-    res.clearCookie("connect.sid");
-    return res.json({ ok: true });
-  });
-});
-
-// Temporary permissive authentication middleware placeholder.
-// Replace with real auth logic (session check, JWT, etc.) as needed.
-// Session configuration (used for simple session-based auth)
-const SESSION_SECRET = process.env.SESSION_SECRET || "change-me";
-app.use(
-  session({
-    secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === "production",
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-    },
-  })
-);
-
-// Session-based authentication middleware
-function ensureAuth(req, res, next) {
-  if (req.session && req.session.user) return next();
-  if (req.headers.accept && req.headers.accept.includes("application/json")) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  // Redirect to login page in `public/login.html`
-  return res.redirect("/login.html");
-}
+// Authentication removed: app is open without login for knowledge-base usage.
 
 // Ask - ENHANCED VERSION with comprehensive structured output
-app.post("/ask", ensureAuth, async (req, res) => {
+app.post("/ask", async (req, res) => {
   const { question, industry, scenario, top_k = 6 } = req.body || {};
   if (!question) return res.status(400).json({ error: "question required" });
 
