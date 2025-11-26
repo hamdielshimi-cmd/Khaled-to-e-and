@@ -5,6 +5,8 @@ import path from "path";
 
 dotenv.config();
 
+import session from "express-session";
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -20,8 +22,29 @@ app.get("/", (req, res) => {
 
 // Temporary permissive authentication middleware placeholder.
 // Replace with real auth logic (session check, JWT, etc.) as needed.
+// Session configuration (used for simple session-based auth)
+const SESSION_SECRET = process.env.SESSION_SECRET || "change-me";
+app.use(
+  session({
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    },
+  })
+);
+
+// Session-based authentication middleware
 function ensureAuth(req, res, next) {
-  return next();
+  if (req.session && req.session.user) return next();
+  if (req.headers.accept && req.headers.accept.includes("application/json")) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  // Redirect to login page in `public/login.html`
+  return res.redirect("/login.html");
 }
 
 // Ask - ENHANCED VERSION with comprehensive structured output
@@ -63,6 +86,11 @@ app.post("/ask", ensureAuth, async (req, res) => {
     }))
   });
 });
+
+  // Health check route
+  app.get("/health", (req, res) => {
+    res.json({ status: "ok", uptime: process.uptime(), timestamp: Date.now() });
+  });
 
 // ===== COMPREHENSIVE ANSWER BUILDER =====
 function buildComprehensiveAnswer(question, relevantChunks, industry, scenario) {
