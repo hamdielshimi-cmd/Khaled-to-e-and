@@ -122,6 +122,9 @@ function buildComprehensiveAnswer(question, relevantChunks, industry, scenario) 
     return answer; 
 } // <--- Final, correct closing brace for the function
 
+  return answer;
+}
+
 // ===== HELPER FUNCTIONS =====
 
 function generateSummary(chunks) {
@@ -289,7 +292,8 @@ function extractTechnicalDetails(chunks) {
   const allText = chunks.map(c => c.text).join(" ");
   let details = "";
   
-  const urlPattern = /(https?:\/\/[^\s]+)/g;
+  const urlPattern = /(https?:\/\/[^
+\s]+)/g;
   const urls = allText.match(urlPattern) || [];
   
   if (urls.length > 0) {
