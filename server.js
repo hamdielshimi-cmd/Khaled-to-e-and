@@ -9,6 +9,15 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve static files from the `public` directory (so GET / works)
+const publicDir = path.join(process.cwd(), "public");
+app.use(express.static(publicDir));
+
+// Root route: serve `public/index.html` for GET /
+app.get("/", (req, res) => {
+  res.sendFile(path.join(publicDir, "index.html"));
+});
+
 // Temporary permissive authentication middleware placeholder.
 // Replace with real auth logic (session check, JWT, etc.) as needed.
 function ensureAuth(req, res, next) {
