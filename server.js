@@ -1,3 +1,20 @@
+import express from "express";
+import session from "express-session";
+import dotenv from "dotenv";
+import path from "path";
+
+dotenv.config();
+
+const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Temporary permissive authentication middleware placeholder.
+// Replace with real auth logic (session check, JWT, etc.) as needed.
+function ensureAuth(req, res, next) {
+  return next();
+}
+
 // Ask - ENHANCED VERSION with comprehensive structured output
 app.post("/ask", ensureAuth, async (req, res) => {
   const { question, industry, scenario, top_k = 6 } = req.body || {};
@@ -365,3 +382,9 @@ function getScenarioLabel(scenario) {
   };
   return labels[scenario] || scenario;
 }
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});
