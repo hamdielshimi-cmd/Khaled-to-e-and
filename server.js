@@ -40,89 +40,87 @@ app.post("/ask", ensureAuth, async (req, res) => {
 
 // ===== COMPREHENSIVE ANSWER BUILDER =====
 function buildComprehensiveAnswer(question, relevantChunks, industry, scenario) {
-  let answer = "";
-  
-  // 1. INTRODUCTION
-  answer += `# الإجابة الشاملة على سؤالك\n\n`;
-  answer += `**السؤال:** ${question}\n\n`;
-  
-  if (industry) {
-    answer += `**القطاع:** ${getIndustryLabel(industry)}\n`;
-  }
-  if (scenario) {
-    answer += `**السيناريو:** ${getScenarioLabel(scenario)}\n`;
-  }
-  answer += `\n---\n\n`;
+    let answer = "";
+    
+    // 1. INTRODUCTION
+    answer += `# الإجابة الشاملة على سؤالك\n\n`;
+    answer += `**السؤال:** ${question}\n\n`;
+    
+    if (industry) {
+      answer += `**القطاع:** ${getIndustryLabel(industry)}\n`;
+    }
+    if (scenario) {
+      answer += `**السيناريو:** ${getScenarioLabel(scenario)}\n`;
+    }
+    answer += `\n---\n\n`;
 
-  // 2. EXECUTIVE SUMMARY
-  answer += `## 📋 الملخص التنفيذي\n\n`;
-  const summary = generateSummary(relevantChunks);
-  answer += summary + "\n\n";
-  answer += `---\n\n`;
+    // 2. EXECUTIVE SUMMARY
+    answer += `## 📋 الملخص التنفيذي\n\n`;
+    const summary = generateSummary(relevantChunks);
+    answer += summary + "\n\n";
+    answer += `---\n\n`;
 
-  // 3. DETAILED EXPLANATION
-  answer += `## 📖 الشرح التفصيلي\n\n`;
-  answer += `### الهدف من هذا الحل:\n`;
-  answer += `نحن هنا لنوضح لك بالضبط كيف يمكن استخدام Zoho لحل هذه المشكلة، بحيث كل خطوة واضحة ومفهومة.\n\n`;
+    // 3. DETAILED EXPLANATION
+    answer += `## 📖 الشرح التفصيلي\n\n`;
+    answer += `### الهدف من هذا الحل:\n`;
+    answer += `نحن هنا لنوضح لك بالضبط كيف يمكن استخدام Zoho لحل هذه المشكلة، بحيث كل خطوة واضحة ومفهومة.\n\n`;
 
-  // 4. WORKFLOW STEPS
-  answer += `### 🔄 دورة العمل الطبيعية:\n\n`;
-  const workflow = generateWorkflow(relevantChunks, question);
-  answer += workflow + "\n\n";
+    // 4. WORKFLOW STEPS
+    answer += `### 🔄 دورة العمل الطبيعية:\n\n`;
+    const workflow = generateWorkflow(relevantChunks, question);
+    answer += workflow + "\n\n";
 
-  // 5. DEPARTMENTS/MODULES INVOLVED
-  answer += `### 🏢 الأقسام/الوحدات المشاركة:\n\n`;
-  const modules = identifyModules(relevantChunks);
-  answer += modules + "\n\n";
+    // 5. DEPARTMENTS/MODULES INVOLVED
+    answer += `### 🏢 الأقسام/الوحدات المشاركة:\n\n`;
+    const modules = identifyModules(relevantChunks);
+    answer += modules + "\n\n";
 
-  // 6. STEP-BY-STEP IMPLEMENTATION
-  answer += `## ⚙️ التطبيق خطوة بخطوة\n\n`;
-  const steps = generateStepByStep(relevantChunks, question);
-  answer += steps + "\n\n";
+    // 6. STEP-BY-STEP IMPLEMENTATION
+    answer += `## ⚙️ التطبيق خطوة بخطوة\n\n`;
+    const steps = generateStepByStep(relevantChunks, question);
+    answer += steps + "\n\n";
 
-  // 7. COMMON PROBLEMS & SOLUTIONS
-  answer += `## ⚠️ المشاكل الشائعة وحلولها\n\n`;
-  const problems = generateProblemSolutions(relevantChunks);
-  answer += problems + "\n\n";
+    // 7. COMMON PROBLEMS & SOLUTIONS
+    answer += `## ⚠️ المشاكل الشائعة وحلولها\n\n`;
+    const problems = generateProblemSolutions(relevantChunks);
+    answer += problems + "\n\n";
 
-  // 8. EXPECTED RESULTS
-  answer += `## ✅ النتيجة المتوقعة:\n\n`;
-  const results = generateExpectedResults(relevantChunks);
-  answer += results + "\n\n";
+    // 8. EXPECTED RESULTS
+    answer += `## ✅ النتيجة المتوقعة:\n\n`;
+    const results = generateExpectedResults(relevantChunks);
+    answer += results + "\n\n";
 
-// ... (Code up to point 8) ...
+    // 9. TECHNICAL DETAILS
+    answer += `## 🔧 التفاصيل التقنية:\n\n`;
+    const technical = extractTechnicalDetails(relevantChunks);
+    answer += technical + "\n\n"; // Fix applied here
 
-// 9. TECHNICAL DETAILS
-answer += `## 🔧 التفاصيل التقنية:\n\n`; 
-const technical = extractTechnicalDetails(relevantChunks);
-answer += technical + "\n\n"; // Fix for previous backtick error
+    // 10. PRICING / ROI (Structured based on previous intent)
+    // This section was likely the source of the structural error.
+    if (containsPricingInfo(relevantChunks)) {
+        answer += `## 💰 الأسعار والعائد على الاستثمار\n\n`;
+        const pricing = extractPricingInfo(relevantChunks);
+        answer += pricing + "\n\n"; // Fixed and placed inside the IF block
+    }
+    // THE FUNCTION CONTINUES HERE, WITHOUT ANY PREMATURE CLOSING BRACE
 
-// 10. PRICING / ROI (NEW SECTION)
-// This code block was placed incorrectly in the original structure.
-if (containsPricingInfo(relevantChunks)) { // Add a check to see if pricing data exists
-    answer += `## 💰 الأسعار والعائد على الاستثمار\n\n`;
-    const pricing = extractPricingInfo(relevantChunks);
-    answer += pricing + "\n\n"; // Removed the old, incorrect assignment
-}
-// REMOVE THE ROGUE '}' HERE
-// } <--- DO NOT INCLUDE THIS LINE!
+    // 11. NEXT STEPS
+    answer += `## 🎯 الخطوات التالية:\n\n`;
+    answer += `1. **المراجعة:** راجع هذا الحل مع فريقك\n`;
+    answer += `2. **التخطيط:** حدد الأولويات والجدول الزمني\n`;
+    answer += `3. **التطبيق:** ابدأ بمرحلة تجريبية صغيرة\n`;
+    answer += `4. **التوسع:** وسّع النطاق بعد النجاح الأولي\n\n`;
 
-// 11. NEXT STEPS
-answer += `## 🎯 الخطوات التالية:\n\n`;
-answer += `1. **المراجعة:** راجع هذا الحل مع فريقك\n`;
-answer += `2. **التخطيط:** حدد الأولويات والجدول الزمني\n`;
-answer += `3. **التطبيق:** ابدأ بمرحلة تجريبية صغيرة\n`;
-answer += `4. **التوسع:** وسّع النطاق بعد النجاح الأولي\n\n`;
+    // 12. SOURCE REFERENCES
+    answer += `---\n\n`;
+    answer += `## 📚 المصادر المستخدمة:\n\n`;
+    relevantChunks.forEach((chunk, idx) => {
+      answer += `${idx + 1}. **${path.basename(chunk.file)}** (جزء ${chunk.chunk_index}) - درجة التطابق: ${(chunk.score * 100).toFixed(1)}%\n`;
+    });
 
-// 12. SOURCE REFERENCES
-answer += `---\n\n`;
-answer += `## 📚 المصادر المستخدمة:\n\n`;
-relevantChunks.forEach((chunk, idx) => {
-    answer += `${idx + 1}. **${path.basename(chunk.file)}** (جزء ${chunk.chunk_index}) - درجة التطابق: ${(chunk.score * 100).toFixed(1)}%\n`;
-});
-
-return answer;
-} // <--- Final closing brace for buildComprehensiveAnswer is correctly placed here
+    // THIS IS NOW THE CORRECT LINE (LINE 127 in the original code after fixes)
+    return answer; 
+} // <--- Final, correct closing brace for the function
 
   return answer;
 }
