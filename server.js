@@ -36,14 +36,27 @@ app.post("/ask", async (req, res) => {
   }))
     .sort((a, b) => b.score - a.score)
     .slice(0, top_k);
-
   const relevant = scored.filter((s) => s.score > 0.01);
 
+  // Debug logging: show basic matching stats to help diagnose empty results
+  console.debug("/ask question:", question);
+  console.debug("INDEX size:", Array.isArray(INDEX) ? INDEX.length : typeof INDEX);
+  console.debug("scored top:", scored.slice(0, 5).map(s => ({ file: s.file, score: s.score })));
+
+  // If no high-confidence matches, fall back to the best match (if any) and mark low confidence
+  let lowConfidence = false;
   if (relevant.length === 0) {
-    return res.json({
-      answer_ar: "لا توجد معلومات كافية في المصادر الحالية.",
-      sources: []
-    });
+    if (scored.length === 0) {
+      console.warn("No indexed chunks available to answer the question.");
+      return res.json({
+        answer_ar: "لا توجد معلومات كافية في المصادر الحالية.",
+        sources: []
+      });
+    }
+    // fallback: use the top-scoring chunk even if its score is low
+    relevant.push(scored[0]);
+    lowConfidence = true;
+    console.info("No high-confidence matches — using top fallback chunk with score:", scored[0].score);
   }
 
   // ===== BUILD COMPREHENSIVE ANSWER =====
@@ -51,6 +64,7 @@ app.post("/ask", async (req, res) => {
   
   res.json({ 
     answer_ar: answer, 
+    low_confidence: lowConfidence,
     sources: relevant.map(s => ({
       file: path.basename(s.file),
       chunk_index: s.chunk_index,
