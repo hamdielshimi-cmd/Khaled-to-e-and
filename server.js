@@ -19,6 +19,91 @@ app.get("/", (req, res) => {
 
 // Authentication removed: app is open without login for knowledge-base usage.
 
+// ===== STUB IMPLEMENTATIONS FOR VECTORIZATION =====
+// Tokenize a string into words (simple whitespace + punctuation split)
+function tokenize(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s]/g, " ")
+    .split(/\s+/)
+    .filter(t => t.length > 0);
+}
+
+// Build a term-frequency vector from tokens
+function termFreqVector(tokens) {
+  const vec = {};
+  tokens.forEach(token => {
+    vec[token] = (vec[token] || 0) + 1;
+  });
+  return vec;
+}
+
+// Compute cosine similarity between two vectors
+function cosine(vec1, vec2) {
+  const keys = new Set([...Object.keys(vec1), ...Object.keys(vec2)]);
+  let dotProduct = 0;
+  let mag1 = 0;
+  let mag2 = 0;
+  
+  keys.forEach(key => {
+    const v1 = vec1[key] || 0;
+    const v2 = vec2[key] || 0;
+    dotProduct += v1 * v2;
+    mag1 += v1 * v1;
+    mag2 += v2 * v2;
+  });
+  
+  const denominator = Math.sqrt(mag1) * Math.sqrt(mag2);
+  return denominator === 0 ? 0 : dotProduct / denominator;
+}
+
+// ===== DEMO KNOWLEDGE BASE INDEX =====
+// This is a fallback demo index with sample Zoho knowledge chunks.
+// In production, replace this with actual document indexing (from files, DB, etc.)
+const INDEX = [
+  {
+    id: "zoho_1",
+    file: "zoho-crm-intro.md",
+    chunk_index: 0,
+    text: "Zoho CRM هو نظام إدارة علاقات العملاء (CRM) الشامل الذي يساعد الشركات على تنظيم وإدارة عمليات المبيعات والتسويق والخدمات. يوفر Zoho CRM أدوات قوية لتتبع العملاء والفرص والعروض والعقود.",
+    vec: {}
+  },
+  {
+    id: "zoho_2",
+    file: "zoho-crm-features.md",
+    chunk_index: 0,
+    text: "من أهم ميزات Zoho CRM: إدارة جهات الاتصال، تتبع الفرص البيعية، أتمتة العمليات، التقارير والتحليلات، التكامل مع تطبيقات أخرى، وتطبيقات الهاتف الذكي.",
+    vec: {}
+  },
+  {
+    id: "zoho_3",
+    file: "zoho-books-accounting.md",
+    chunk_index: 0,
+    text: "Zoho Books هو برنامج محاسبة وتمويل سحابي يساعد الشركات الصغيرة والمتوسطة على إدارة فواتيرهم ونفقاتهم وشؤونهم المالية. يدعم Zoho Books إنشاء الفواتير والنفقات والتقارير المالية.",
+    vec: {}
+  },
+  {
+    id: "zoho_4",
+    file: "zoho-inventory-management.md",
+    chunk_index: 0,
+    text: "Zoho Inventory هو نظام إدارة المخزون الذي يساعد على تتبع المنتجات والمستودعات والمبيعات والشراء. يوفر تقارير فورية عن حالة المخزون والمنتجات الأكثر مبيعاً.",
+    vec: {}
+  },
+  {
+    id: "zoho_5",
+    file: "zoho-getting-started.md",
+    chunk_index: 0,
+    text: "للبدء مع Zoho CRM، تحتاج إلى: إنشاء حساب Zoho مجاني، تسجيل الدخول إلى لوحة التحكم، إضافة جهات اتصال، وإنشاء فرص بيعية. يمكنك بدء النسخة المجانية دون الحاجة إلى بطاقة ائتمان.",
+    vec: {}
+  }
+];
+
+// Pre-compute vectors for all chunks (happens on startup)
+INDEX.forEach(chunk => {
+  const tokens = tokenize(chunk.text);
+  chunk.vec = termFreqVector(tokens);
+});
+
 // Ask - ENHANCED VERSION with comprehensive structured output
 app.post("/ask", async (req, res) => {
   const { question, industry, scenario, top_k = 6 } = req.body || {};
